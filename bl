@@ -7,14 +7,39 @@ from optparse import OptionParser
 import argparse
 load_dotenv()
 
-# 渡された引数やサブコマンドなどをパース
-parser = OptionParser()
-parser.add_option("-f", "--file", dest="filename",
-        help="write report to FILE", metavar="FILE")
-parser.add_option("-q", "--quite",
-        action="store_false", dest="verbose", default=True,
-        help="don't print status messages to stdout")
+BACKLOG_API_KEY = os.getenv('BACKLOG_API_KEY')
 
-(options, args) = parser.parse_args()
+def command_wiki(args):
+    print(BACKLOG_API_KEY)
+
+def command_help(args):
+    print(parser.parse_args([args.command, '--help']))
+
+# 渡された引数やサブコマンドなどをパース
+parser = argparse.ArgumentParser(description='Backlog command line interface')
+subparsers = parser.add_subparsers()
+
+parser_wiki = subparsers.add_parser('wiki', help='see `wiki -h`')
+parser_wiki.add_argument('-L', '--list', action='store_true', help='List all wiki pages')
+parser_wiki.set_defaults(handler=command_wiki)
+
+parser_help = subparsers.add_parser('help', help='see `help -h`')
+parser_help.add_argument('command', help='command name which help is shown')
+parser_help.set_defaults(handler=command_help)
+
+args = parser.parse_args()
+if hasattr(args, 'handler'):
+    args.handler(args)
+else:
+    parser.print_help()
+
+# parser = OptionParser()
+# parser.add_option("-f", "--file", dest="filename",
+#         help="write report to FILE", metavar="FILE")
+# parser.add_option("-q", "--quite",
+#         action="store_false", dest="verbose", default=True,
+#         help="don't print status messages to stdout")
+# 
+# (options, args) = parser.parse_args()
 
 # パースしたものをもとに各コマンドへルーティング

@@ -7,15 +7,11 @@ import configparser
 import requests
 from optparse import OptionParser
 import argparse
+import re
 
 HOME = expanduser("~")
 config = configparser.ConfigParser()
 DEFAULT = 'default'
-
-if DEFAULT in config:
-    BACKLOG_API_KEY = config[DEFAULT]
-else:
-    BACKLOG_API_KEY = None
 
 path = HOME + '/.bl'
 conffile = path + '/credentials'
@@ -58,8 +54,35 @@ Your configuration flie {filepath} is below.
     except KeyboardInterrupt:
         print("Configuration dialogue has stopped.")
 
-def command_wiki(args):
-    print(BACKLOG_API_KEY)
+def command_wiki_list(args):
+    global DEFAULT
+    global config
+    if args.name is None:
+        args.name = DEFAULT
+    try:
+        BACKLOG_URL = config[args.name]['base_url']
+        BACKLOG_API_KEY = config[args.name]['access_key']
+    except KeyError:
+        global conffile
+        print('''
+There seems no configuration `{name}`
+Please make sure your configuration name is exists in the {conffile}.
+        '''.format(name=args.name,conffile=conffile)
+        )
+    res = requests.get(add_schema(BACKLOG_URL) + '/api/v2/wikis',
+            params={
+                'apiKey': BACKLOG_API_KEY,
+                'projectIdOrKey': args.project
+                }
+            )
+    print(res.text)
+
+def add_schema(url):
+    if not re.match(r"https?", url):
+        url = f'https://{url}'
+    if re.match(r"http:", url):
+        url = re.sub('http:', 'https:', url)
+    return url
 
 def command_help(args):
     print(parser.parse_args([args.command, '--help']))
@@ -69,15 +92,25 @@ parser = argparse.ArgumentParser(description='Backlog command line interface')
 subparsers = parser.add_subparsers()
 
 parser_configure = subparsers.add_parser('configure', help='see `configure -h`')
-parser_configure.add_argument('-n', '--name', metavar='NAME', help='name of configuration', default='default')
 parser_configure.add_argument('-o', '--output', dest='output',
         help='OUTPUT is output path of configuration file',
         metavar='OUTPUT')
 parser_configure.set_defaults(handler=command_configure)
 
 parser_wiki = subparsers.add_parser('wiki', help='see `wiki -h`')
-parser_wiki.add_argument('-L', '--list', action='store_true', help='List all wiki pages')
-parser_wiki.set_defaults(handler=command_wiki)
+parser_wiki.add_argument('-n', '--name',
+        dest='name',
+        help='Select which configuration you use. If NAME is not set, `default` would be selected.',
+        metavar='FILE')
+
+wiki_subparsers = parser_wiki.add_subparsers()
+parser_wiki_list = wiki_subparsers.add_parser('list', help='List all wiki pages.')
+parser_wiki_list.add_argument('-p', '--project',
+        dest='project',
+        help='ProjectID or ProjectKey.',
+        metavar='PROJECT',
+        required=True)
+parser_wiki_list.set_defaults(handler=command_wiki_list)
 
 parser_help = subparsers.add_parser('help', help='see `help -h`')
 parser_help.add_argument('command', help='command name which help is shown')

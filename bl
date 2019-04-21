@@ -10,30 +10,51 @@ import argparse
 
 HOME = expanduser("~")
 config = configparser.ConfigParser()
+DEFAULT = 'default'
+
+if DEFAULT in config:
+    BACKLOG_API_KEY = config[DEFAULT]
+else:
+    BACKLOG_API_KEY = None
+
+path = HOME + '/.bl'
+conffile = path + '/credentials'
+if not os.path.exists(path):
+    os.makedirs(path)
+if not os.path.isdir(path):
+    sys.exit(f'Path {path} is not a directory. Please make sure the path is a directory.')
+
+config.read(conffile)
 
 def command_configure(args):
     try:
+        print("Please input your configuration name(default): ")
+        config_name = input()
+        global DEFAULT
+        if config_name is '':
+            config_name = DEFAULT
+        global config
+
         print("Please input your backlog url: ")
         base_url = input()
         print("Please input your backlog access key: ")
         access_key = input()
 
-        config['nksm'] = {
+        config[config_name] = {
             'base_url':base_url,
             'access_key': access_key,
         }
 
-        if args.output is None:
-            path = HOME + '/.bl'
-            conffile = path + '/credentials'
-            if not os.path.exists(path):
-                os.makedirs(path)
-            if not os.path.isdir(path):
-                sys.exit(f'Path {path} is not a directory. Please make sure the path is a directory.')
-        else:
-            conffile = args.output
-        with open(conffile, 'w') as configfile:
-            config.write(configfile)
+        global conffile
+        with open(conffile, 'w') as f:
+            config.write(f)
+        with open(conffile, 'r') as f:
+            print('''
+Your configuration flie {filepath} is below.
+            '''.format(filepath=conffile)
+            )
+            print(f.read())
+            
     except KeyboardInterrupt:
         print("Configuration dialogue has stopped.")
 

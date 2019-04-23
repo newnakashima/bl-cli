@@ -1,0 +1,7 @@
+#!/usr/bin/expect -f
+# 対話式のコマンド実行をテストする
+
+spawn python bl.py configure
+expect {
+	
+}

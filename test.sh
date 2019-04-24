@@ -9,8 +9,8 @@ access_key = hoge
 EOF
 )
 if [ "$(cat ~/.bl/credentials)" == "$credentials" ]; then
-	echo "success"
+	echo "Configure command has succeeded"
 else
-	echo "failed"
+	echo "Configure command has failed"
 fi
 mv ~/.bl/credentials.org ~/.bl/credentials

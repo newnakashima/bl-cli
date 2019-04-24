@@ -13,15 +13,6 @@ HOME = expanduser("~")
 config = configparser.ConfigParser()
 DEFAULT = 'default'
 
-path = HOME + '/.bl'
-conffile = path + '/credentials'
-if not os.path.exists(path):
-    os.makedirs(path)
-if not os.path.isdir(path):
-    sys.exit(f'Path {path} is not a directory. Please make sure the path is a directory.')
-
-config.read(conffile)
-
 def command_configure(args):
     try:
         print("Please input your configuration name(default): ")
@@ -54,7 +45,7 @@ Your configuration flie {filepath} is below.
     except KeyboardInterrupt:
         print("Configuration dialogue has stopped.")
 
-def command_wiki_list(args):
+def get_wiki_list(args):
     global DEFAULT
     global config
     if args.name is None:
@@ -75,7 +66,10 @@ Please make sure your configuration name is exists in the {conffile}.
                 'projectIdOrKey': args.project
                 }
             )
-    print(res.text)
+    return res
+
+def command_wiki_list(args):
+    print(get_wiki_list(args))
 
 def add_schema(url):
     if not re.match(r"https?", url):
@@ -102,6 +96,14 @@ def command_help(args):
     print(parser.parse_args([args.command, '--help']))
 
 if __name__ == '__main__':
+    path = HOME + '/.bl'
+    conffile = path + '/credentials'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    if not os.path.isdir(path):
+        sys.exit(f'Path {path} is not a directory. Please make sure the path is a directory.')
+
+    config.read(conffile)
 
     # 渡された引数やサブコマンドなどをパース
     parser = argparse.ArgumentParser(description='Backlog command line interface')

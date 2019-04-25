@@ -66,7 +66,7 @@ Please make sure your configuration name is exists in the {conffile}.
                 'projectIdOrKey': args.project
                 }
             )
-    return res
+    return res.text
 
 def command_wiki_list(args):
     print(get_wiki_list(args))

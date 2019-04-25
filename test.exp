@@ -1,0 +1,11 @@
+#!/usr/bin/expect -f
+# 対話式のコマンド実行をテストする
+
+spawn python bl.py configure 
+expect "Please" 
+send "hoge\n"
+expect "Please"
+send "hoge\n"
+expect "Please"
+send "hoge\n"
+interact

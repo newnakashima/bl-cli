@@ -78,7 +78,7 @@ def add_schema(url):
         url = re.sub('http:', 'https:', url)
     return url
 
-def command_wiki_show(args):
+def get_wiki_show(args):
     global DEFAULT
     global config
     if args.name is None:
@@ -90,7 +90,10 @@ def command_wiki_show(args):
                 'apiKey': BACKLOG_API_KEY,
                 }
             )
-    print(res.text)
+    return res.text
+
+def command_wiki_show(args):
+    print(get_wiki_show(args))
 
 def command_help(args):
     print(parser.parse_args([args.command, '--help']))

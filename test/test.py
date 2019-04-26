@@ -1,7 +1,8 @@
 import unittest
 from argparse import Namespace
-import bl
 import os
+import sys
+import bl
 import json
 
 class TestBacklogCli(unittest.TestCase):

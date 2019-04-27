@@ -51,20 +51,20 @@ class TestBacklogCli(unittest.TestCase):
         args.name = TestBacklogCli.TEST_CONFIG
         params = [
             {
-                'archived': 'true',
-                'all': 'true',
+                'archived': True,
+                'all': True,
             },
             {
-                'archived': 'true',
-                'all': 'false',
+                'archived': True,
+                'all': False,
             },
             {
-                'archived': 'false',
-                'all': 'true',
+                'archived': False,
+                'all': True,
             },
             {
-                'archived': 'false',
-                'all': 'false',
+                'archived': False,
+                'all': False,
             }
         ]
         for p in params:
@@ -75,9 +75,13 @@ class TestBacklogCli(unittest.TestCase):
                 res_json = json.loads(res)
             except Exception:
                 self.fail('JSONの読み込みに失敗しました')
-            self.assertTrue('id' in res_json)
-            self.assertTrue('projectKey' in res_json)
-            self.assertTrue('name' in res_json)
+            if not args.archived:
+                for r in res_json:
+                    self.assertTrue('id' in r)
+                    self.assertTrue('projectKey' in r)
+                    self.assertTrue('name' in r)
+            else:
+                self.assertEqual(0, len(res_json))
 
 if __name__ == '__main__':
     unittest.main()

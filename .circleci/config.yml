@@ -9,9 +9,10 @@ jobs:
             - run:
                 name: Install Pipenv
                 command: |
-                    pip install pipenv
-                    pipenv install
                     sudo apt install expect
+                    pip install pipenv
+                    pipenv shell
+                    pipenv install
             - run:
                 name: Test
                 command: test/test.sh

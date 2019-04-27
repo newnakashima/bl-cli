@@ -82,6 +82,19 @@ class TestBacklogCli(unittest.TestCase):
                     self.assertTrue('name' in r)
             else:
                 self.assertEqual(0, len(res_json))
+    
+    def test_command_projects_show(self):
+        args = Namespace()
+        args.name = TestBacklogCli.TEST_CONFIG
+        args.projectIdOrKey = '16487'
+        res = bl.get_projects_show(args)
+        try:
+            res_json = json.loads(res)
+        except Exception:
+            self.fail('JSONの読み込みに失敗しました')
+        self.assertTrue('id' in res_json)
+        self.assertTrue('projectKey' in res_json)
+        self.assertTrue('name' in res_json)
 
 if __name__ == '__main__':
     unittest.main()

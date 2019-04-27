@@ -82,7 +82,7 @@ class TestBacklogCli(unittest.TestCase):
                     self.assertTrue('name' in r)
             else:
                 self.assertEqual(0, len(res_json))
-    
+
     def test_command_projects_show(self):
         args = Namespace()
         args.name = TestBacklogCli.TEST_CONFIG

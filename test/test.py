@@ -8,7 +8,7 @@ import json
 class TestBacklogCli(unittest.TestCase):
     TEST_CONFIG = 'test'
     def setUp(self):
-        bl.config.read('test_config.ini')
+        bl.config.read('test/test_config.ini')
         BACKLOG_URL = os.environ.get('BACKLOG_URL')
         BACKLOG_API_KEY = os.environ.get('BACKLOG_API_KEY')
         bl.config[TestBacklogCli.TEST_CONFIG]['base_url'] = BACKLOG_URL
@@ -45,6 +45,39 @@ class TestBacklogCli(unittest.TestCase):
         self.assertTrue('id' in res_json)
         self.assertTrue('projectId' in res_json)
         self.assertTrue('name' in res_json)
+
+    def test_command_projects(self):
+        args = Namespace()
+        args.name = TestBacklogCli.TEST_CONFIG
+        params = [
+            {
+                'archived': 'true',
+                'all': 'true',
+            },
+            {
+                'archived': 'true',
+                'all': 'false',
+            },
+            {
+                'archived': 'false',
+                'all': 'true',
+            },
+            {
+                'archived': 'false',
+                'all': 'false',
+            }
+        ]
+        for p in params:
+            args.archived = p['archived']
+            args.all = p['all']
+            res = bl.get_projects(args)
+            try:
+                res_json = json.loads(res)
+            except Exception:
+                self.fail('JSONの読み込みに失敗しました')
+            self.assertTrue('id' in res_json)
+            self.assertTrue('projectKey' in res_json)
+            self.assertTrue('name' in res_json)
 
 if __name__ == '__main__':
     unittest.main()

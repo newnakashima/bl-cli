@@ -2,8 +2,11 @@
 
 # 対話式コマンドのテスト
 
-mv ~/.bl/credentials ~/.bl/credentials.org
-./test.exp
+
+if [ -e ~/.bl/credentials ]; then
+    mv ~/.bl/credentials ~/.bl/credentials.org
+fi
+$(dirname $0)/test.exp
 credentials=$(cat << EOF
 [hoge]
 base_url = hoge
@@ -14,8 +17,12 @@ if [ "$(cat ~/.bl/credentials)" == "$credentials" ]; then
 	echo "Configure command has succeeded"
 else
 	echo "Configure command has failed"
+	mv ~/.bl/credentials.org ~/.bl/credentials
+	exit 1
 fi
-mv ~/.bl/credentials.org ~/.bl/credentials
+if [ -e ~/.bl/credentials.org ]; then
+    mv ~/.bl/credentials.org ~/.bl/credentials
+fi
 
 cat <<EOF
 
@@ -24,4 +31,4 @@ cat <<EOF
 EOF
 
 # UT
-python test.py
+python test/test.py

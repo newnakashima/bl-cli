@@ -95,6 +95,27 @@ def get_wiki_show(args):
 def command_wiki_show(args):
     print(get_wiki_show(args))
 
+def get_projects(args):
+    global DEFAULT
+    global config
+    if args.name is None:
+        args.name = DEFAULT
+    BACKLOG_URL = add_schema(config[args.name]['base_url'])
+    BACKLOG_API_KEY = config[args.name]['access_key']
+    archived = 'true' if args.archived else 'false'
+    all_projects = 'true' if args.all else 'false'
+    res = requests.get(BACKLOG_URL + '/api/v2/projects',
+            params={
+                'apiKey': BACKLOG_API_KEY,
+                'archived': archived,
+                'all': all_projects,
+                }
+            )
+    return res.text
+
+def command_projects(args):
+    print(get_projects(args))
+
 def command_help(args):
     print(parser.parse_args([args.command, '--help']))
 
@@ -110,6 +131,11 @@ if __name__ == '__main__':
 
     # 渡された引数やサブコマンドなどをパース
     parser = argparse.ArgumentParser(description='Backlog command line interface')
+    parser.add_argument('-n', '--name',
+            dest='name',
+            help='Select which configuration you use. If NAME is not set, `default` would be selected.',
+            metavar='NAME')
+
     subparsers = parser.add_subparsers()
 
     parser_configure = subparsers.add_parser('configure', help='see `configure -h`')
@@ -119,11 +145,6 @@ if __name__ == '__main__':
     parser_configure.set_defaults(handler=command_configure)
 
     parser_wiki = subparsers.add_parser('wiki', help='see `wiki -h`')
-    parser_wiki.add_argument('-n', '--name',
-            dest='name',
-            help='Select which configuration you use. If NAME is not set, `default` would be selected.',
-            metavar='FILE')
-
     wiki_subparsers = parser_wiki.add_subparsers()
 
     # wikiページ一覧取得
@@ -138,15 +159,23 @@ if __name__ == '__main__':
     # wikiページ内容取得
     parser_wiki_show = wiki_subparsers.add_parser('show', help='Show a wiki page.')
     parser_wiki_show.add_argument('id')
-    parser_wiki_show.add_argument('-n', '--name',
-            dest='name',
-            help='Select which configuration you use. If NAME is not set, `default` would be selected.',
-            metavar='FILE')
     parser_wiki_show.set_defaults(handler=command_wiki_show)
 
     parser_help = subparsers.add_parser('help', help='see `help -h`')
     parser_help.add_argument('command', help='command name which help is shown')
     parser_help.set_defaults(handler=command_help)
+
+    # project一覧取得
+    parser_projects = subparsers.add_parser('projects', help='see `projects -h`')
+    parser_projects.add_argument('-a', '--archived',
+            action='store_true',
+            dest='archived',
+            help='Include archived project or not')
+    parser_projects.add_argument('--all',
+            action='store_true',
+            dest='all',
+            help="Include the project which you don't participated or not")
+    parser_projects.set_defaults(handler=command_projects)
 
     args = parser.parse_args()
     if hasattr(args, 'handler'):

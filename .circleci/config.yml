@@ -11,6 +11,7 @@ jobs:
                 command: |
                     pip install pipenv
                     pipenv install
+                    sudo apt install expect
             - run:
                 name: Test
                 command: test/test.sh

@@ -3,18 +3,15 @@ version: 2.1
 jobs:
     build:
         docker:
-            - image: circleci/python:3.7.3
+            - image: newnakashima/bl-cli:latest
         steps:
             - checkout
             - run:
                 name: Install Pipenv
                 command: |
-                    sudo apt install expect
-                    pip install pipenv
-                    pipenv install
+                    sudo pipenv install
             - run:
                 name: Test
                 command: |
-                    pwd
                     test/test.sh
 

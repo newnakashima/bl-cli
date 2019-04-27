@@ -5,9 +5,10 @@ jobs:
         docker:
             - image: circleci/python:3.7.3
         steps:
+            - checkout
             - run:
                 name: Install Pipenv
-                comand: |
+                command: |
                     pip install pipenv
                     pipenv install
             - run:

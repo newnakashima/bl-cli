@@ -2,7 +2,10 @@
 
 # 対話式コマンドのテスト
 
-mv ~/.bl/credentials ~/.bl/credentials.org
+
+if [ -e ~/.bl/credentials ]; then
+    mv ~/.bl/credentials ~/.bl/credentials.org
+fi
 $(dirname $0)/test.exp
 credentials=$(cat << EOF
 [hoge]
@@ -17,7 +20,9 @@ else
 	mv ~/.bl/credentials.org ~/.bl/credentials
 	exit 1
 fi
-mv ~/.bl/credentials.org ~/.bl/credentials
+if [ -e ~/.bl/credentials.org ]; then
+    mv ~/.bl/credentials.org ~/.bl/credentials
+fi
 
 cat <<EOF
 

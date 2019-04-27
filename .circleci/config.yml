@@ -10,6 +10,8 @@ jobs:
                 name: Install Pipenv
                 command: |
                     sudo pipenv install
+                    cat bl.py
+                    cat test/test.py
             - run:
                 name: Test
                 command: |

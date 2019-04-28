@@ -96,7 +96,7 @@ def get_wiki_show(args):
 def command_wiki_show(args):
     print(get_wiki_show(args))
 
-def get_projects(args):
+def get_projects_list(args):
     global DEFAULT
     global config
     if args.name is None:
@@ -114,8 +114,8 @@ def get_projects(args):
             )
     return res.text
 
-def command_projects(args):
-    print(get_projects(args))
+def command_projects_list(args):
+    print(get_projects_list(args))
 
 def get_projects_show(args):
     global DEFAULT
@@ -133,6 +133,36 @@ def get_projects_show(args):
 
 def command_projects_show(args):
     print(get_projects_show(args))
+
+def get_projects_update(args):
+    global DEFAULT
+    global config
+    if args.name is None:
+        args.name = DEFAULT
+    BACKLOG_URL = add_schema_and_path(config[args.name]['base_url'])
+    BACKLOG_API_KEY = config[args.name]['access_key']
+    data = {}
+    keys = [
+        'p_name',
+        'p_key',
+        'chartEnabled',
+        'subtaskingEnabled',
+        'projectLeaderCanEditProjectLeader',
+        'textFormattingRule',
+        'archived',
+    ]
+    for key in keys:
+        if hasattr(args, key):
+            key = re.sub(r'p_(.*)', r'\1', key)
+            data[key] = getattr(args, key)
+    res = requests.patch(BACKLOG_URL + '/projects/' + args.project,
+            params={ 'apiKey': BACKLOG_API_KEY },
+            data=data
+    )
+    return res.text
+
+def command_projects_update(args):
+    print(get_projects_update(args))
 
 def command_help(args):
     print(parser.parse_args([args.command, '--help']))
@@ -185,22 +215,31 @@ if __name__ == '__main__':
 
     # project一覧取得
     parser_projects = subparsers.add_parser('projects', help='see `projects -h`')
-    parser_projects.add_argument('-a', '--archived',
+    projects_subparsers = parser_projects.add_subparsers()
+    parser_projects_list = projects_subparsers.add_parser('list', help='List projects')
+    parser_projects_list.add_argument('-a', '--archived',
             action='store_true',
             dest='archived',
             help='Include archived project or not')
-    parser_projects.add_argument('--all',
+    parser_projects_list.add_argument('--all',
             action='store_true',
             dest='all',
             help="Include the project which you don't participated or not")
-    parser_projects.set_defaults(handler=command_projects)
+    parser_projects_list.set_defaults(handler=command_projects_list)
 
-    projects_subparsers = parser_projects.add_subparsers()
+    # project情報取得
     parser_projects_show = projects_subparsers.add_parser('show', help='see `projects show -h`')
     parser_projects_show.add_argument('project',
-            help='ProjectID or ProjectKey.',
+            help='ProjectID or ProjectKey',
             metavar='PROJECT')
     parser_projects_show.set_defaults(handler=command_projects_show)
+
+    # project更新
+    parser_projects_update = projects_subparsers.add_parser('update', help='see `projects update -h`')
+    parser_projects_update.add_argument('project',
+            help='ProjectID or ProjectKey',
+            metavar='PROJECT')
+    parser_projects_update.set_defaults(handler=command_projects_update)
 
     args = parser.parse_args()
     if hasattr(args, 'handler'):

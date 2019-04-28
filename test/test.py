@@ -46,7 +46,7 @@ class TestBacklogCli(unittest.TestCase):
         self.assertTrue('projectId' in res_json)
         self.assertTrue('name' in res_json)
 
-    def test_command_projects(self):
+    def test_command_projects_list(self):
         args = Namespace()
         args.name = TestBacklogCli.TEST_CONFIG
         params = [
@@ -70,7 +70,7 @@ class TestBacklogCli(unittest.TestCase):
         for p in params:
             args.archived = p['archived']
             args.all = p['all']
-            res = bl.get_projects(args)
+            res = bl.get_projects_list(args)
             try:
                 res_json = json.loads(res)
             except Exception:
@@ -88,6 +88,19 @@ class TestBacklogCli(unittest.TestCase):
         args.name = TestBacklogCli.TEST_CONFIG
         args.project = 'sandbox'
         res = bl.get_projects_show(args)
+        try:
+            res_json = json.loads(res)
+        except Exception:
+            self.fail('JSONの読み込みに失敗しました')
+        self.assertTrue('id' in res_json)
+        self.assertTrue('projectKey' in res_json)
+        self.assertTrue('name' in res_json)
+
+    def test_command_projects_update(self):
+        args = Namespace()
+        args.name = TestBacklogCli.TEST_CONFIG
+        args.project = 'sandbox'
+        res = bl.get_projects_update(args)
         try:
             res_json = json.loads(res)
         except Exception:

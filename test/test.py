@@ -14,10 +14,10 @@ class TestBacklogCli(unittest.TestCase):
         bl.config[TestBacklogCli.TEST_CONFIG]['base_url'] = BACKLOG_URL
         bl.config[TestBacklogCli.TEST_CONFIG]['access_key'] = BACKLOG_API_KEY
 
-    def test_add_schema(self):
-        self.assertEqual('https://nksm.backlog.com', bl.add_schema('nksm.backlog.com'))
-        self.assertEqual('https://nksm.backlog.com', bl.add_schema('http://nksm.backlog.com'))
-        self.assertNotEqual('https://nksm.backlog.com', bl.add_schema('hoge://nksm.backlog.com'))
+    def test_add_schema_and_path(self):
+        self.assertEqual('https://nksm.backlog.com/api/v2', bl.add_schema_and_path('nksm.backlog.com'))
+        self.assertEqual('https://nksm.backlog.com/api/v2', bl.add_schema_and_path('http://nksm.backlog.com'))
+        self.assertNotEqual('https://nksm.backlog.com/api/v2', bl.add_schema_and_path('hoge://nksm.backlog.com'))
 
     def test_command_wiki_list(self):
         args = Namespace()
@@ -82,6 +82,19 @@ class TestBacklogCli(unittest.TestCase):
                     self.assertTrue('name' in r)
             else:
                 self.assertEqual(0, len(res_json))
+
+    def test_command_projects_show(self):
+        args = Namespace()
+        args.name = TestBacklogCli.TEST_CONFIG
+        args.project = 'sandbox'
+        res = bl.get_projects_show(args)
+        try:
+            res_json = json.loads(res)
+        except Exception:
+            self.fail('JSONの読み込みに失敗しました')
+        self.assertTrue('id' in res_json)
+        self.assertTrue('projectKey' in res_json)
+        self.assertTrue('name' in res_json)
 
 if __name__ == '__main__':
     unittest.main()

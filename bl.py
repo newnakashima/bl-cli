@@ -12,6 +12,7 @@ import re
 HOME = expanduser("~")
 config = configparser.ConfigParser()
 DEFAULT = 'default'
+API_PATH = '/api/v2'
 
 def command_configure(args):
     try:
@@ -51,7 +52,7 @@ def get_wiki_list(args):
     if args.name is None:
         args.name = DEFAULT
     try:
-        BACKLOG_URL = add_schema(config[args.name]['base_url'])
+        BACKLOG_URL = add_schema_and_path(config[args.name]['base_url'])
         BACKLOG_API_KEY = config[args.name]['access_key']
     except KeyError:
         global conffile
@@ -60,7 +61,7 @@ There seems no configuration `{name}`
 Please make sure your configuration name is exists in the {conffile}.
         '''.format(name=args.name,conffile=conffile)
         )
-    res = requests.get(BACKLOG_URL + '/api/v2/wikis',
+    res = requests.get(BACKLOG_URL + '/wikis',
             params={
                 'apiKey': BACKLOG_API_KEY,
                 'projectIdOrKey': args.project
@@ -71,21 +72,21 @@ Please make sure your configuration name is exists in the {conffile}.
 def command_wiki_list(args):
     print(get_wiki_list(args))
 
-def add_schema(url):
+def add_schema_and_path(url):
     if not re.match(r"https?", url):
         url = f'https://{url}'
     if re.match(r"http:", url):
         url = re.sub('http:', 'https:', url)
-    return url
+    return url + API_PATH
 
 def get_wiki_show(args):
     global DEFAULT
     global config
     if args.name is None:
         args.name = DEFAULT
-    BACKLOG_URL = add_schema(config[args.name]['base_url'])
+    BACKLOG_URL = add_schema_and_path(config[args.name]['base_url'])
     BACKLOG_API_KEY = config[args.name]['access_key']
-    res = requests.get(BACKLOG_URL + '/api/v2/wikis/' + args.id,
+    res = requests.get(BACKLOG_URL + '/wikis/' + args.id,
             params={
                 'apiKey': BACKLOG_API_KEY,
                 }
@@ -100,11 +101,11 @@ def get_projects(args):
     global config
     if args.name is None:
         args.name = DEFAULT
-    BACKLOG_URL = add_schema(config[args.name]['base_url'])
+    BACKLOG_URL = add_schema_and_path(config[args.name]['base_url'])
     BACKLOG_API_KEY = config[args.name]['access_key']
     archived = 'true' if args.archived else 'false'
     all_projects = 'true' if args.all else 'false'
-    res = requests.get(BACKLOG_URL + '/api/v2/projects',
+    res = requests.get(BACKLOG_URL + '/projects',
             params={
                 'apiKey': BACKLOG_API_KEY,
                 'archived': archived,
@@ -115,6 +116,23 @@ def get_projects(args):
 
 def command_projects(args):
     print(get_projects(args))
+
+def get_projects_show(args):
+    global DEFAULT
+    global config
+    if args.name is None:
+        args.name = DEFAULT
+    BACKLOG_URL = add_schema_and_path(config[args.name]['base_url'])
+    BACKLOG_API_KEY = config[args.name]['access_key']
+    res = requests.get(BACKLOG_URL + '/projects/' + args.project,
+            params={
+                'apiKey': BACKLOG_API_KEY,
+            }
+    )
+    return res.text
+
+def command_projects_show(args):
+    print(get_projects_show(args))
 
 def command_help(args):
     print(parser.parse_args([args.command, '--help']))
@@ -176,6 +194,13 @@ if __name__ == '__main__':
             dest='all',
             help="Include the project which you don't participated or not")
     parser_projects.set_defaults(handler=command_projects)
+
+    projects_subparsers = parser_projects.add_subparsers()
+    parser_projects_show = projects_subparsers.add_parser('show', help='see `projects show -h`')
+    parser_projects_show.add_argument('project',
+            help='ProjectID or ProjectKey.',
+            metavar='PROJECT')
+    parser_projects_show.set_defaults(handler=command_projects_show)
 
     args = parser.parse_args()
     if hasattr(args, 'handler'):

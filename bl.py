@@ -153,8 +153,9 @@ def get_projects_update(args):
     ]
     for key in keys:
         if hasattr(args, key):
+            value = getattr(args, key)
             key = re.sub(r'p_(.*)', r'\1', key)
-            data[key] = getattr(args, key)
+            data[key] = value
     res = requests.patch(BACKLOG_URL + '/projects/' + args.project,
             params={ 'apiKey': BACKLOG_API_KEY },
             data=data
@@ -239,6 +240,11 @@ if __name__ == '__main__':
     parser_projects_update.add_argument('project',
             help='ProjectID or ProjectKey',
             metavar='PROJECT')
+    parser_projects_update.add_argument('-n', '--name',
+            help='new project name',
+            dest='p_name',
+            metavar='NAME')
+
     parser_projects_update.set_defaults(handler=command_projects_update)
 
     args = parser.parse_args()

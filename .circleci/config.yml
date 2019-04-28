@@ -10,6 +10,8 @@ jobs:
                 name: Install Pipenv
                 command: |
                     sudo pipenv install
+                    pwd
+                    echo $PYTHONPATH
             - run:
                 name: Test
                 command: |
